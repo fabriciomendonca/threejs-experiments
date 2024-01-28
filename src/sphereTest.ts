@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import fragmentShader from "./shaders/sphereTest.frag.glsl";
+import fragmentShader from "./shaders/secondStudy.frag.glsl";
 import vertexShader from "./shaders/sphereTest.vert.glsl";
 
 export const sphereTest = () => {
@@ -10,14 +10,18 @@ export const sphereTest = () => {
   const material = new THREE.ShaderMaterial({
     fragmentShader,
     vertexShader,
+    blending: THREE.AdditiveBlending,
   });
 
   const sphere = new THREE.Mesh(geometry, material);
-  sphere.position.set(-5, 0, 0);
+  sphere.position.set(0, 0, 0);
 
   const internalTick = (time: number) => {
     material.uniforms.uTime = { value: time / 1000 };
+    let position = -Math.abs(Math.sin(time / 5000) * 10);
     window.requestAnimationFrame(internalTick);
+
+    sphere.position.z = position;
   };
 
   return {
