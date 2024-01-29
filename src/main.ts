@@ -13,10 +13,11 @@ const init = () => {
   );
 
   renderer.start();
-  renderer.renderSphere();
-  renderer.renderTargetTexture();
-
+  // renderer.renderSphere();
+  // renderer.renderTargetTexture();
   // renderer.renderCubeMap();
+
+  renderer.renderDisplacementTest();
 };
 
 init();

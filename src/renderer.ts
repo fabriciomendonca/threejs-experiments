@@ -12,6 +12,7 @@ import { renderTargetTest } from "./renderTargetTest";
 import { Ticker } from "./types";
 import { videoTexture } from "./videoTexture";
 import { cubeMap } from "./cubeMap";
+import { displacementTest } from "./displacementTest";
 
 export const createRenderer = (container: HTMLDivElement) => {
   const width = container.clientWidth;
@@ -84,6 +85,12 @@ export const createRenderer = (container: HTMLDivElement) => {
       container.appendChild(mainRendererCanvas);
       ticker = createTicker();
     },
+    showBackground() {
+      scene.background = new THREE.Color(0x000000);
+    },
+    autoRotateOrbitControls() {
+      orbitControls.autoRotate = true;
+    },
     renderRoom() {
       const loader = new RGBELoader();
       loader.load("environment.hdr", (texture) => {
@@ -117,7 +124,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       mesh.rotateX(-Math.PI / 2);
       scene.add(mesh);
 
-      orbitControls.autoRotate = true;
+      this.autoRotateOrbitControls();
 
       const animationParts = new Map();
 
@@ -205,10 +212,10 @@ export const createRenderer = (container: HTMLDivElement) => {
       }
       window.cancelAnimationFrame(ticker.id);
       
-      orbitControls.autoRotate = true;
+      this.autoRotateOrbitControls();
 
       const renderTargetTexture = renderTargetTest(mainRenderer, ticker);
-      scene.background = new THREE.Color(0x000000);
+      this.showBackground();
 
       // const geometry = new THREE.PlaneGeometry(10, 10, 128, 128);
       const geometry = new THREE.SphereGeometry(5, 128, 128);
@@ -370,5 +377,13 @@ export const createRenderer = (container: HTMLDivElement) => {
       };
       internalTicker();
     },
+
+    renderDisplacementTest() {
+      this.showBackground();
+      this.autoRotateOrbitControls();
+      const data = displacementTest();
+
+      scene.add(data.mesh);
+    }
   };
 };
