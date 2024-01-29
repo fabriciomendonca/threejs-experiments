@@ -383,7 +383,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       this.autoRotateOrbitControls();
       const data = displacementTest();
 
-      scene.add(data.mesh);
+      data.meshes.forEach(mesh => scene.add(mesh));
     }
   };
 };
