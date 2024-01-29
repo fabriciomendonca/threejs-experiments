@@ -12,7 +12,7 @@ import { renderTargetTest } from "./renderTargetTest";
 import { Ticker } from "./types";
 import { videoTexture } from "./videoTexture";
 import { cubeMap } from "./cubeMap";
-import { displacementTest } from "./displacementTest";
+import { displacementTest } from "./displacementTests";
 
 export const createRenderer = (container: HTMLDivElement) => {
   const width = container.clientWidth;
@@ -85,8 +85,8 @@ export const createRenderer = (container: HTMLDivElement) => {
       container.appendChild(mainRendererCanvas);
       ticker = createTicker();
     },
-    showBackground() {
-      scene.background = new THREE.Color(0x000000);
+    showBackground(color: number = 0x000000) {
+      scene.background = new THREE.Color(color);
     },
     autoRotateOrbitControls() {
       orbitControls.autoRotate = true;
@@ -211,7 +211,7 @@ export const createRenderer = (container: HTMLDivElement) => {
         return;
       }
       window.cancelAnimationFrame(ticker.id);
-      
+
       this.autoRotateOrbitControls();
 
       const renderTargetTexture = renderTargetTest(mainRenderer, ticker);
@@ -219,7 +219,7 @@ export const createRenderer = (container: HTMLDivElement) => {
 
       // const geometry = new THREE.PlaneGeometry(10, 10, 128, 128);
       const geometry = new THREE.SphereGeometry(5, 128, 128);
-      
+
       const material = new THREE.MeshStandardMaterial({
         map: renderTargetTexture.renderTarget.texture,
         blending: THREE.AdditiveBlending,
@@ -311,7 +311,6 @@ export const createRenderer = (container: HTMLDivElement) => {
         video.height / (settings.height ?? video.height)
       );
 
-
       // Canvas that will hold the extracted image from canvasVideo
       const backgroundWidth = 600;
       const backgroundHeight = 800;
@@ -379,11 +378,17 @@ export const createRenderer = (container: HTMLDivElement) => {
     },
 
     renderDisplacementTest() {
-      this.showBackground();
-      this.autoRotateOrbitControls();
-      const data = displacementTest();
+      this.showBackground(0xababa0);
+      // this.autoRotateOrbitControls();
 
-      data.meshes.forEach(mesh => scene.add(mesh));
-    }
+      const tests = displacementTest();
+
+      // Test 1
+      // const data = tests.test1();
+      // data.meshes.forEach((mesh) => scene.add(mesh));
+
+      const dataTest2 = tests.test2();
+      dataTest2.meshes.forEach((mesh) => scene.add(mesh));
+    },
   };
 };

@@ -2,7 +2,6 @@ import * as THREE from "three";
 import fragmentShader from "./shaders/sphereTest.frag.glsl";
 import vertexShader from "./shaders/sphereTest.vert.glsl";
 import { Ticker } from "./types";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 export const renderTargetTest = (
   renderer: THREE.WebGLRenderer,
