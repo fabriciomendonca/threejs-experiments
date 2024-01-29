@@ -31,7 +31,7 @@ export const createRenderer = (container: HTMLDivElement) => {
   const mainCamera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
   mainCamera.position.set(0, 0, 20);
 
-  // Renderer
+  // RENDERER
   const mainRenderer = new THREE.WebGLRenderer({ alpha: true });
   mainRenderer.shadowMap.enabled = true;
   mainRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -40,13 +40,15 @@ export const createRenderer = (container: HTMLDivElement) => {
   mainRenderer.setClearColor(0x000000, 0);
   const mainRendererCanvas = mainRenderer.domElement;
 
-  // Orbit Controls
+  // ORBIT CONTROLS
   const orbitControls = new OrbitControls(mainCamera, mainRendererCanvas);
-  // orbitControls.enableDamping = true;
+  orbitControls.enableDamping = true;
 
-  // Animation mixers
+  // ANIMATION MIXERS
   const mixers: THREE.AnimationMixer[] = [];
   let lastTickInSeconds = 0;
+
+  // ANIMATION LOOP FACTORY
   let ticker: Ticker;
   const createTicker = () => {
     let id = 0;
@@ -202,16 +204,22 @@ export const createRenderer = (container: HTMLDivElement) => {
         return;
       }
       window.cancelAnimationFrame(ticker.id);
+      
+      orbitControls.autoRotate = true;
+
       const renderTargetTexture = renderTargetTest(mainRenderer, ticker);
       scene.background = new THREE.Color(0x000000);
+
       // const geometry = new THREE.PlaneGeometry(10, 10, 128, 128);
       const geometry = new THREE.SphereGeometry(5, 128, 128);
+      
       const material = new THREE.MeshStandardMaterial({
         map: renderTargetTexture.renderTarget.texture,
         blending: THREE.AdditiveBlending,
         metalness: 0,
         roughness: 1,
       });
+
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.set(0, 0, 0);
 
@@ -264,6 +272,7 @@ export const createRenderer = (container: HTMLDivElement) => {
         video: true,
       });
 
+      // Video element to attach the webcam
       const video = document.createElement("video");
       video.srcObject = stream;
       video.autoplay = true;
@@ -276,6 +285,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       video.height = window.innerHeight;
       document.body.appendChild(video);
 
+      // Canvas that will clone the video image
       const canvasVideo = document.createElement("canvas");
       canvasVideo.width = video.width;
       canvasVideo.height = video.height;
@@ -285,6 +295,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       canvasVideo.style.left = "0";
       canvasVideo.style.transform = "scaleX(-1)";
 
+      // Clone video image
       const context = canvasVideo.getContext("2d") as CanvasRenderingContext2D;
       // document.body.appendChild(canvasVideo);
       const settings = stream.getTracks()[0].getSettings();
@@ -292,9 +303,11 @@ export const createRenderer = (container: HTMLDivElement) => {
         video.width / (settings.width ?? video.width),
         video.height / (settings.height ?? video.height)
       );
+
+
+      // Canvas that will hold the extracted image from canvasVideo
       const backgroundWidth = 600;
       const backgroundHeight = 800;
-
       const canvasBackground = document.createElement("canvas");
       const contextBg = canvasBackground.getContext(
         "2d"
@@ -322,6 +335,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       scene.add(mesh);
 
       const internalTicker = async (time = 0) => {
+        // Extract a 3:4 part of the webcam image cloned in the canvasVideo
         context.drawImage(video, 0, 0);
         const data = context.getImageData(
           (canvasVideo.width - backgroundWidth) / 2,
@@ -331,6 +345,7 @@ export const createRenderer = (container: HTMLDivElement) => {
         );
         contextBg.putImageData(data, 0, 0);
 
+        // Create cube map from canvas
         const cube = await cubeMap(canvasVideo);
         const { images } = cube;
 
@@ -344,6 +359,8 @@ export const createRenderer = (container: HTMLDivElement) => {
             images[5].toDataURL(),
           ],
           async () => {
+            // (Un)Comment the next line to show the cube map as the scene background
+            // setting it as the environment map will already create the reflection in scene objects
             // scene.background = texture;
             scene.environment = texture;
           }

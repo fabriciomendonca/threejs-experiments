@@ -2,10 +2,11 @@ import * as THREE from "three";
 import fragmentShader from "./shaders/sphereTest.frag.glsl";
 import vertexShader from "./shaders/sphereTest.vert.glsl";
 import { Ticker } from "./types";
+import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 export const renderTargetTest = (
   renderer: THREE.WebGLRenderer,
-  ticker: Ticker
+  ticker: Ticker,
 ) => {
   const fakeScene = new THREE.Scene();
   const renderTarget = new THREE.WebGLRenderTarget(
@@ -32,12 +33,8 @@ export const renderTargetTest = (
     renderer.setRenderTarget(renderTarget);
     renderer.clear();
     renderer.render(fakeScene, fakeCamera);
-
     renderer.setRenderTarget(null);
-    // renderer.clear();
-    // renderer.render(fakeScene, fakeCamera);
-
-    renderer.clear();
+    
     ticker.render(time);
     requestAnimationFrame(internalTick);
   };
