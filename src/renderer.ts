@@ -379,7 +379,7 @@ export const createRenderer = (container: HTMLDivElement) => {
 
     renderDisplacementTest() {
       this.showBackground(0xababa0);
-      // this.autoRotateOrbitControls();
+      this.autoRotateOrbitControls();
 
       const tests = displacementTest();
 
@@ -387,7 +387,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       // const data = tests.test1();
       // data.meshes.forEach((mesh) => scene.add(mesh));
 
-      const dataTest2 = tests.test2();
+      const dataTest2 = tests.test3();
       dataTest2.meshes.forEach((mesh) => scene.add(mesh));
     },
   };
