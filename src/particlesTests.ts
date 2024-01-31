@@ -111,5 +111,67 @@ export const particlesTests = () => {
         particles,
       };
     },
+
+    test3() {
+      const geometry = new THREE.BufferGeometry();
+
+      const material = new THREE.PointsMaterial({
+        // color: 0xf838ab,
+        size: 0.01,
+        sizeAttenuation: true,
+        depthWrite: false,
+        // blending: THREE.AdditiveBlending,
+        vertexColors: true,
+      });
+
+      const numParticles = 5000;
+      const positions = new Float32Array(numParticles * 3);
+      const colors = new Float32Array(numParticles * 3);
+
+      for (let i = 0; i < numParticles; i++) {
+        const i3 = i * 3;
+        const rand = Math.pow(Math.random() - 0.5, 3);
+        const x = Math.sin(i * 100) * rand * 10000;
+        const y = Math.cos(i * 100) * rand * 10000;
+        const z = Math.tan(i * i * 150) * rand * 10000;
+        positions[i3] = x;
+        positions[i3 + 1] = y;
+        positions[i3 + 2] = z;
+
+        colors[i3] = 0.2 / Math.random();
+        colors[i3 + 1] = 0.2 / Math.random();
+        colors[i3 + 2] = 0.1 / Math.random();
+      }
+
+      geometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(positions, 3)
+      );
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+      const particles = new THREE.Points(geometry, material);
+
+      const internalTick = (time = 0) => {
+        for (let i = 0; i < numParticles; i++) {
+          const i3 = i * 3;
+          const x = geometry.attributes.position.array[i3];
+          const y = geometry.attributes.position.array[i3 + 1];
+          const z = geometry.attributes.position.array[i3 + 2];
+
+          positions[i3] += 1 / Math.sin(time / 1000 + y) / 10;
+          positions[i3 + 1] += Math.cos(time / 1000 + z) / 10;
+          positions[i3 + 2] += Math.sin(time / 1000 + x) / 10;
+        }
+
+        geometry.attributes.position.needsUpdate = true;
+        window.requestAnimationFrame(internalTick);
+      };
+
+      internalTick();
+
+      return {
+        particles,
+      };
+    },
   };
 };
