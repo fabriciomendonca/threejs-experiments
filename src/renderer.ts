@@ -397,7 +397,7 @@ export const createRenderer = (container: HTMLDivElement) => {
 
       const tests = particlesTests();
 
-      const { particles } = tests.test1();
+      const { particles } = tests.test2();
 
       scene.add(particles);
     },
