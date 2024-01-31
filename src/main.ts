@@ -17,7 +17,9 @@ const init = () => {
   // renderer.renderTargetTexture();
   // renderer.renderCubeMap();
 
-  renderer.renderDisplacementTest();
+  // renderer.renderDisplacementTest();
+
+  renderer.renderParticleTests();
 };
 
 init();

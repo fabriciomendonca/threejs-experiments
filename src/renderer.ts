@@ -13,6 +13,7 @@ import { Ticker } from "./types";
 import { videoTexture } from "./videoTexture";
 import { cubeMap } from "./cubeMap";
 import { displacementTest } from "./displacementTests";
+import { particlesTests } from "./particlesTests";
 
 export const createRenderer = (container: HTMLDivElement) => {
   const width = container.clientWidth;
@@ -389,6 +390,16 @@ export const createRenderer = (container: HTMLDivElement) => {
 
       const dataTest2 = tests.test3();
       dataTest2.meshes.forEach((mesh) => scene.add(mesh));
+    },
+
+    renderParticleTests() {
+      this.showBackground(0x000000);
+
+      const tests = particlesTests();
+
+      const { particles } = tests.test1();
+
+      scene.add(particles);
     },
   };
 };
