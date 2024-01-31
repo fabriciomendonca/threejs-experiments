@@ -378,7 +378,7 @@ export const createRenderer = (container: HTMLDivElement) => {
     },
 
     renderDisplacementTest() {
-      this.showBackground(0xababa0);
+      this.showBackground(0x000000);
       this.autoRotateOrbitControls();
 
       const tests = displacementTest();

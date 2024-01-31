@@ -71,8 +71,8 @@ export const displacementTest = () => {
 
     test3() {
       // const geometry = new THREE.PlaneGeometry(10, 10, 16, 16);
-      const geometry = new THREE.BoxGeometry(10, 10, 10, 128, 128, 128);
-      // const geometry = new THREE.SphereGeometry(5, 128, 128);
+      // const geometry = new THREE.BoxGeometry(10, 10, 10, 128, 128, 128);
+      const geometry = new THREE.SphereGeometry(5, 1024, 1024);
       const material = new THREE.ShaderMaterial({
         fragmentShader: displacementTest3Fragment,
         vertexShader: displacementTest3SVertex,
