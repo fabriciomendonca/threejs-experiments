@@ -189,11 +189,11 @@ export const particlesTests = () => {
         blending: THREE.AdditiveBlending,
         uniforms: {
           uTime: { value: 0 },
-          uSize: { value: 64 * Math.min(window.devicePixelRatio, 2) },
+          uSize: { value: 32 * Math.min(window.devicePixelRatio, 2) },
         },
       });
 
-      const numParticles = 20000;
+      const numParticles = 50000;
       const positions = new Float32Array(numParticles * 3);
       const colors = new Float32Array(numParticles * 3);
 
