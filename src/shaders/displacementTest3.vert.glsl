@@ -1,5 +1,6 @@
 varying vec2 vUv;
 varying vec3 vPosition;
+varying vec3 vFinalPattern;
 
 uniform float uTime;
 
@@ -40,21 +41,20 @@ void main() {
 
   vec2 uvCopy = uv * 2.0 - 1.0;
 
-  float pattern = noise(uvCopy);
+  float pattern = noise(uvCopy) * (abs(sin(uTime / 5.0)) * 10.0 + 5.0);
   uvCopy += pattern;
-  // float d = length(uvCopy) - 0.5;
-  // d *= fract(uvCopy.x * 2.0) - 0.5;
-  // d = sin(d * 8.0 + uTime) / 8.0;
-  // d = 1.0 - smoothstep(0., 0.7, d);
-  // d = sin(uTime) * 10.0/ d - sin(uTime) * 10.0;
 
   float d = mod(pattern * 4.0, 1.0);
-  d = 1.0 - smoothstep(0.1, 0.8, d);
-  // d = 0.6 / d;
+  d = smoothstep(0.3, 0.8, d);
+
+  vec3 finalPattern = normal * d;
+  // vec3(d + sin(d * 2.0 + uTime), d + abs(sin(d / 2.0 + uTime)), d + abs(cos(d  + uTime)));
   
-  vec3 newPosition = position + normal * vec3(d + sin(d * 2.0 + uTime), d + abs(sin(d / 2.0 + uTime)), d + abs(cos(d  + uTime)));
+  vec3 newPosition = position + finalPattern;
   
   vec4 modelViewPosition = modelViewMatrix * vec4(newPosition, 1.0);
   vec4 projectedPosition = projectionMatrix * modelViewPosition;
   gl_Position = projectedPosition;
+
+  vFinalPattern = finalPattern;
 }

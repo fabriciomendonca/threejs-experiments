@@ -13,13 +13,14 @@ const init = () => {
   );
 
   renderer.start();
+  // renderer.renderCapoeiraModel();
   // renderer.renderSphere();
   // renderer.renderTargetTexture();
+  // renderer.renderVideoTexture();
   // renderer.renderCubeMap();
-
   // renderer.renderDisplacementTest();
-
-  renderer.renderParticleTests();
+  // renderer.renderParticleTests();
+  renderer.renderGuitarHero();
 };
 
 init();

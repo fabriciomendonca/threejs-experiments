@@ -14,6 +14,10 @@ import { videoTexture } from "./videoTexture";
 import { cubeMap } from "./cubeMap";
 import { displacementTest } from "./displacementTests";
 import { particlesTests } from "./particlesTests";
+import { Geometry } from "three/examples/jsm/deprecated/Geometry.js";
+import modelParticlesVertex from "./shaders/modelParticles.vert.glsl";
+import modelParticlesFragment from "./shaders/modelParticles.frag.glsl";
+import { guitarHero } from "./guitarHero";
 
 export const createRenderer = (container: HTMLDivElement) => {
   const width = container.clientWidth;
@@ -24,14 +28,14 @@ export const createRenderer = (container: HTMLDivElement) => {
 
   // LIGHTS
   const frontLight = new THREE.PointLight(0xffffff);
-  frontLight.intensity = 5;
+  frontLight.intensity = 100;
   frontLight.castShadow = true;
-  frontLight.position.set(0, 10, 5);
+  frontLight.position.set(0, 10, 0);
   const ambientLight = new THREE.AmbientLight(0xffffff);
 
   // CAMERAS
-  const mainCamera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-  mainCamera.position.set(0, 0, 20);
+  const mainCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  mainCamera.position.set(0, 2, 20);
 
   // RENDERER
   const mainRenderer = new THREE.WebGLRenderer({ alpha: true });
@@ -125,7 +129,8 @@ export const createRenderer = (container: HTMLDivElement) => {
       mesh.rotateX(-Math.PI / 2);
       scene.add(mesh);
 
-      this.autoRotateOrbitControls();
+      // this.autoRotateOrbitControls();
+      this.showBackground();
 
       const animationParts = new Map();
 
@@ -134,7 +139,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       window.addEventListener("keydown", (event) => {
         if (event.key === "a" && !capoeira) {
           animationParts.get("taunt").animation.stop();
-          animationParts.get("capoeira").animation.play();
+
           animationParts.get("capoeira").animation.time = 3;
           animationParts.get("capoeira").animation.fadeIn(0.3);
           capoeira = true;
@@ -146,32 +151,81 @@ export const createRenderer = (container: HTMLDivElement) => {
           taunt = true;
         }
       });
-      window.addEventListener("keyup", (event) => {
-        if (event.key === "a") {
-          animationParts.get("capoeira").animation.fadeOut(1);
-          setTimeout(() => {
-            animationParts.get("capoeira").animation.stop();
-            capoeira = false;
-          }, 1000);
-        } else if (event.key === "d") {
-          animationParts.get("taunt").animation.fadeOut(0.3);
-          setTimeout(() => {
-            animationParts.get("taunt").animation.stop();
-            taunt = false;
-          }, 300);
-        }
-      });
 
       const fbxLoader = new FBXLoader();
       fbxLoader.load("character.fbx", (model) => {
         model.scale.setScalar(0.07);
-        model.position.set(0, 0, 0);
-        model.traverse((node) => {
-          node.castShadow = true;
+        model.position.set(0, 0.01, 0);
+
+        model.children = model.children.map((node: any) => {
+          if (node.isSkinnedMesh) {
+            node.material.emissive = null;
+            node.material.emissiveIntensity = 0;
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute(
+              "position",
+              node.geometry.attributes.position.clone()
+            );
+            geometry.setAttribute("uv", node.geometry.attributes.uv.clone());
+            geometry.setAttribute(
+              "normal",
+              node.geometry.attributes.normal.clone()
+            );
+
+            geometry.setAttribute(
+              "skinIndex",
+              node.geometry.attributes.skinIndex.clone()
+            );
+
+            geometry.setAttribute(
+              "skinWeight",
+              node.geometry.attributes.skinWeight.clone()
+            );
+
+            const colors = new Float32Array(
+              geometry.attributes.position.array.length
+            );
+            for (
+              let i = 0;
+              i < geometry.attributes.position.array.length;
+              i++
+            ) {
+              const i3 = i * 3;
+
+              colors[i3] = Math.random();
+              colors[i3 + 1] = Math.random();
+              colors[i3 + 2] = Math.random();
+            }
+
+            geometry.setAttribute(
+              "color",
+              new THREE.BufferAttribute(colors, 3)
+            );
+
+            const material = new THREE.MeshStandardMaterial({
+              vertexColors: true,
+            });
+
+            material.vertexColors = true;
+            material.depthWrite = false;
+            const points = new THREE.Points(geometry, material);
+            points.scale.setScalar(0.07);
+
+            points.skeleton = node.skeleton;
+            points.bindMatrix = node.bindMatrix;
+            points.bindMatrixInverse = node.bindMatrixInverse;
+            points.bindMode = node.bindMode;
+            points.isSkinnedMesh = true;
+
+            points.updateMatrixWorld = node.updateMatrixWorld;
+            points.castShadow = true;
+            return points;
+          }
+          return node;
         });
 
-        const animationLoader = new FBXLoader();
-        animationLoader.load("capoeira.fbx", (anim) => {
+        fbxLoader.load("capoeira.fbx", (anim) => {
           const capoeira = anim.animations[0];
           // const rightSide: THREE.AnimationClip = THREE.AnimationClip.parse(
           //   THREE.AnimationClip.toJSON(original)
@@ -179,32 +233,25 @@ export const createRenderer = (container: HTMLDivElement) => {
 
           const mixer = new THREE.AnimationMixer(model);
           const animation = mixer.clipAction(capoeira);
-          animation.setDuration(15);
+          // animation.setDuration(15);
           animationParts.set("capoeira", {
             clip: capoeira,
             animation,
           });
           mixers.push(mixer);
+          animationParts.get("capoeira").animation.play();
         });
-        animationLoader.load("taunt.fbx", (anim) => {
-          const taunt = anim.animations[0];
 
-          const mixer = new THREE.AnimationMixer(model);
-          const animation = mixer.clipAction(taunt);
-          animationParts.set("taunt", {
-            clip: taunt,
-            animation,
-          });
-          mixers.push(mixer);
-        });
         scene.add(model);
       });
     },
 
     renderSphere() {
-      const sphere = sphereTest();
-      scene.add(sphere.mesh);
-      sphere.startTick();
+      const testData = sphereTest();
+      const [sphere, sphere1] = testData.meshes;
+      scene.add(sphere);
+      scene.add(sphere1);
+      testData.startTick();
     },
 
     renderTargetTexture() {
@@ -380,16 +427,14 @@ export const createRenderer = (container: HTMLDivElement) => {
 
     renderDisplacementTest() {
       this.showBackground(0x000000);
-      this.autoRotateOrbitControls();
+      // this.autoRotateOrbitControls();
 
       const tests = displacementTest();
 
-      // Test 1
       // const data = tests.test1();
-      // data.meshes.forEach((mesh) => scene.add(mesh));
-
-      const dataTest2 = tests.test3();
-      dataTest2.meshes.forEach((mesh) => scene.add(mesh));
+      // const data = tests.test2();
+      const data = tests.test3();
+      data.meshes.forEach((mesh) => scene.add(mesh));
     },
 
     renderParticleTests() {
@@ -397,9 +442,24 @@ export const createRenderer = (container: HTMLDivElement) => {
 
       const tests = particlesTests();
 
-      const { particles } = tests.test4();
+      // const { particles } = tests.test1();
+      // const { particles } = tests.test2();
+      // const { particles } = tests.test3();
+      // const { particles } = tests.test4();
+      const { particles } = tests.test5();
 
       scene.add(particles);
+    },
+
+    async renderGuitarHero() {
+      this.showBackground(0x000000);
+      const game = guitarHero();
+
+      game.render(scene);
+
+      mainCamera.position.z = 60;
+      mainCamera.position.y = 10;
+      mainCamera.lookAt(new THREE.Vector3(0, 0, 0));
     },
   };
 };
