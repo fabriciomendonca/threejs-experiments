@@ -20,7 +20,8 @@ const init = () => {
   // renderer.renderCubeMap();
   // renderer.renderDisplacementTest();
   // renderer.renderParticleTests();
-  renderer.renderGuitarHero();
+  // renderer.renderGuitarHero();
+  renderer.renderEarTraining();
 };
 
 init();

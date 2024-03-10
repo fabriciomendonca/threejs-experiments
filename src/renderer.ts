@@ -17,7 +17,8 @@ import { particlesTests } from "./particlesTests";
 import { Geometry } from "three/examples/jsm/deprecated/Geometry.js";
 import modelParticlesVertex from "./shaders/modelParticles.vert.glsl";
 import modelParticlesFragment from "./shaders/modelParticles.frag.glsl";
-import { guitarHero } from "./guitarHero";
+import { guitarHero } from "./guitar-hero/guitarHero";
+import { earTraining } from "./ear-training/earTraining";
 
 export const createRenderer = (container: HTMLDivElement) => {
   const width = container.clientWidth;
@@ -455,11 +456,20 @@ export const createRenderer = (container: HTMLDivElement) => {
       this.showBackground(0x000000);
       const game = guitarHero();
 
-      game.render(scene);
+      game.render(scene, mainCamera);
 
       mainCamera.position.z = 60;
       mainCamera.position.y = 10;
       mainCamera.lookAt(new THREE.Vector3(0, 0, 0));
+    },
+
+    renderEarTraining() {
+      this.showBackground(0x000000);
+      const module = earTraining();
+
+      mainCamera.position.z = 1;
+      mainCamera.position.y = 0;
+      module.render(scene, mainCamera);
     },
   };
 };
