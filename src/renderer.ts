@@ -6,7 +6,6 @@ import {
   RGBELoader,
 } from "three/examples/jsm/Addons.js";
 import * as TWEEN from "@tweenjs/tween.js";
-import * as GUI from "dat.gui";
 import { sphereTest } from "./sphereTest";
 import { renderTargetTest } from "./renderTargetTest";
 import { Ticker } from "./types";
@@ -14,9 +13,8 @@ import { videoTexture } from "./videoTexture";
 import { cubeMap } from "./cubeMap";
 import { displacementTest } from "./displacementTests";
 import { particlesTests } from "./particlesTests";
-import { Geometry } from "three/examples/jsm/deprecated/Geometry.js";
-import modelParticlesVertex from "./shaders/modelParticles.vert.glsl";
-import modelParticlesFragment from "./shaders/modelParticles.frag.glsl";
+// import modelParticlesVertex from "./shaders/modelParticles.vert.glsl";
+// import modelParticlesFragment from "./shaders/modelParticles.frag.glsl";
 import { guitarHero } from "./guitar-hero/guitarHero";
 import { earTraining } from "./ear-training/earTraining";
 
@@ -90,6 +88,14 @@ export const createRenderer = (container: HTMLDivElement) => {
       scene.add(mainCamera);
       container.appendChild(mainRendererCanvas);
       ticker = createTicker();
+      window.addEventListener("resize", () => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        mainRenderer.setSize(width, height);
+        mainCamera.aspect = width / height;
+        mainCamera.updateProjectionMatrix();
+      });
     },
     showBackground(color: number = 0x000000) {
       scene.background = new THREE.Color(color);
@@ -213,11 +219,11 @@ export const createRenderer = (container: HTMLDivElement) => {
             const points = new THREE.Points(geometry, material);
             points.scale.setScalar(0.07);
 
-            points.skeleton = node.skeleton;
-            points.bindMatrix = node.bindMatrix;
-            points.bindMatrixInverse = node.bindMatrixInverse;
-            points.bindMode = node.bindMode;
-            points.isSkinnedMesh = true;
+            (points as any).skeleton = node.skeleton;
+            (points as any).bindMatrix = node.bindMatrix;
+            (points as any).bindMatrixInverse = node.bindMatrixInverse;
+            (points as any).bindMode = node.bindMode;
+            (points as any).isSkinnedMesh = true;
 
             points.updateMatrixWorld = node.updateMatrixWorld;
             points.castShadow = true;
@@ -389,7 +395,7 @@ export const createRenderer = (container: HTMLDivElement) => {
 
       scene.add(mesh);
 
-      const internalTicker = async (time = 0) => {
+      const internalTicker = async () => {
         // Extract a 3:4 part of the webcam image cloned in the canvasVideo
         context.drawImage(video, 0, 0);
         const data = context.getImageData(
@@ -467,7 +473,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       this.showBackground(0x000000);
       const module = earTraining();
 
-      mainCamera.position.z = 1;
+      mainCamera.position.z = 25;
       mainCamera.position.y = 0;
       module.render(scene, mainCamera);
     },

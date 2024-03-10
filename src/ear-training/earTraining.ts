@@ -5,7 +5,27 @@ import {
   AudioLib,
   INTERVALS,
   Interval,
+  LEVELS,
+  LevelName,
 } from "./constants/constants";
+import gsap from "gsap";
+
+const loadAudio = async () => {
+  const audio = new Audio();
+
+  const promise = new Promise((resolve) => {
+    audio.addEventListener("canplay", () => {
+      resolve(true);
+    });
+
+    audio.src = AUDIO_LIBS[0].file;
+    audio.load();
+  });
+
+  await Promise.all([promise]);
+
+  return audio;
+};
 
 const loadFonts = async () => {
   /**
@@ -28,16 +48,13 @@ const loadFonts = async () => {
 };
 
 const renderLandingPage = (fonts: Map<string, Font>) => {
-  const geometry = new TextGeometry(
-    "Acerte os intervalos e\ndeixe as partículas verdes",
-    {
-      font: fonts.get("roboto") as Font,
-      size: 1,
-      height: 0.5,
-      curveSegments: 12,
-      bevelEnabled: false,
-    }
-  );
+  const geometry = new TextGeometry("Escolha um nível", {
+    font: fonts.get("roboto") as Font,
+    size: 1,
+    height: 0.5,
+    curveSegments: 12,
+    bevelEnabled: false,
+  });
   const material = new THREE.MeshStandardMaterial({
     color: 0xf28700,
   });
@@ -46,30 +63,69 @@ const renderLandingPage = (fonts: Map<string, Font>) => {
   geometry.center();
 
   const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.y = 2;
   mesh.position.z = -15;
 
-  const geometry1 = new TextGeometry("Iniciar Jogo!", {
+  const geometryEasy = new TextGeometry("Fácil", {
     font: fonts.get("roboto") as Font,
     size: 1,
     height: 0.5,
     curveSegments: 12,
     bevelEnabled: false,
   });
-  const material1 = new THREE.MeshStandardMaterial({
+  const materialEasy = new THREE.MeshStandardMaterial({
     color: 0xf287f7,
   });
 
-  geometry1.computeBoundingBox();
-  geometry1.center();
+  geometryEasy.computeBoundingBox();
+  geometryEasy.center();
 
-  const mesh1 = new THREE.Mesh(geometry1, material1);
-  mesh1.name = "playButton";
-  mesh1.position.y = -3;
-  mesh1.position.z = -15;
+  const meshEasy = new THREE.Mesh(geometryEasy, materialEasy);
+  meshEasy.name = "easy";
+  meshEasy.position.y = 0;
+  meshEasy.position.z = -15;
+
+  const geometryNormal = new TextGeometry("Normal", {
+    font: fonts.get("roboto") as Font,
+    size: 1,
+    height: 0.5,
+    curveSegments: 12,
+    bevelEnabled: false,
+  });
+  const materialNormal = new THREE.MeshStandardMaterial({
+    color: 0xf287f7,
+  });
+
+  geometryNormal.computeBoundingBox();
+  geometryNormal.center();
+
+  const meshNormal = new THREE.Mesh(geometryNormal, materialNormal);
+  meshNormal.name = "normal";
+  meshNormal.position.y = -2;
+  meshNormal.position.z = -15;
+
+  const geometryHard = new TextGeometry("Difícil", {
+    font: fonts.get("roboto") as Font,
+    size: 1,
+    height: 0.5,
+    curveSegments: 12,
+    bevelEnabled: false,
+  });
+  const materialHard = new THREE.MeshStandardMaterial({
+    color: 0xf287f7,
+  });
+
+  geometryHard.computeBoundingBox();
+  geometryHard.center();
+
+  const meshHard = new THREE.Mesh(geometryHard, materialHard);
+  meshHard.name = "normal";
+  meshHard.position.y = -4;
+  meshHard.position.z = -15;
 
   const group = new THREE.Group();
 
-  group.add(mesh, mesh1);
+  group.add(mesh, meshEasy, meshNormal, meshHard);
   return group;
 };
 
@@ -93,6 +149,25 @@ const renderReplayButton = (fonts: Map<string, Font>) => {
   group.add(text);
   group.position.z = -15;
   return group;
+};
+
+const renderFeedback = (fonts: Map<string, Font>) => {
+  const geometry = new TextGeometry("acertô miserávi!", {
+    font: fonts.get("roboto") as Font,
+    size: 0.5,
+    height: 0.25,
+    curveSegments: 12,
+  });
+  geometry.computeBoundingBox();
+  geometry.center();
+
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x48fb97,
+  });
+
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.z = -10;
+  return mesh;
 };
 
 const renderIntervals = (fonts: Map<string, Font>) => {
@@ -143,9 +218,9 @@ const createParticles = () => {
   for (let i = 0; i < size; i++) {
     const i3 = i * 3;
 
-    const x = (Math.random() - 0.5) * 20;
-    const y = (Math.random() - 0.5) * 20;
-    const z = (Math.random() - 0.5) * 20;
+    const x = (Math.random() - 0.5) * 45;
+    const y = (Math.random() - 0.5) * 45;
+    const z = (Math.random() - 0.5) * 45;
     positions[i3] = x;
     positions[i3 + 1] = y;
     positions[i3 + 2] = z;
@@ -174,7 +249,6 @@ const renderAnswers = (
 
   currentAnswers.forEach((answer, index) => {
     if (index > 0 && index % numColumns === 0) {
-      console.log(index);
       posX = 0;
       posY += stepY;
     } else if (index > 0) {
@@ -235,8 +309,17 @@ const createIntervalsGame = async (
   let currentAnswers: Interval[] = [];
   let replayButton: THREE.Group;
   let audioLib: AudioLib = AUDIO_LIBS[0];
+  let audio: HTMLAudioElement;
+  let isAudioPlaying = false;
   let root = 0;
+  let rightAnswersCount = 0;
   let rightAnswersPct = 0;
+  let currentLevelName: LevelName = "easy";
+  let currentLevel = LEVELS[currentLevelName];
+  let levelIntervals: Interval[] = [];
+  let intervalId = 0;
+  let intervalAudioOn = 0;
+  let intervalAudioOff = 0;
 
   const fonts = await loadFonts();
   const intervalsMeshes = renderIntervals(fonts);
@@ -262,7 +345,7 @@ const createIntervalsGame = async (
         if (hits.length > 0) {
           const selected = hits[0].object;
 
-          if (selected.name === "playButton") {
+          if (selected.name) {
             homeText.children.forEach((child) => {
               (child as THREE.Mesh).geometry.dispose();
               ((child as THREE.Mesh).material as THREE.Material).dispose();
@@ -271,21 +354,32 @@ const createIntervalsGame = async (
             });
             scene.remove(homeText);
             window.removeEventListener("mouseup", onStart);
-            this.startGame();
+
+            this.startGame(selected.name as LevelName);
           }
         }
       };
       window.addEventListener("mouseup", onStart);
       scene.add(homeText);
     },
-    startGame() {
+    async startGame(level: LevelName) {
+      audio = await loadAudio();
+      currentLevelName = level;
+      currentLevel = LEVELS[currentLevelName];
+
+      levelIntervals = INTERVALS.filter(
+        (interval) => currentLevel.intervals.indexOf(interval.id) !== -1
+      );
+
       this.createListeners();
       this.createNewInterval();
     },
+
     createNewInterval() {
       this.chooseInterval();
       this.chooseRootNoteToPlay();
       this.chooseAnswers();
+      this.playCurrentInterval();
 
       replayButton = renderReplayButton(fonts);
       if (answersGroup) {
@@ -318,20 +412,84 @@ const createIntervalsGame = async (
 
           this.onAnswer(isRightAnswer);
         }
+
+        const replayHits = raycaster.intersectObjects(replayButton.children);
+        if (replayHits.length > 0 && !isAudioPlaying) {
+          this.playCurrentInterval();
+        }
       });
     },
     onAnswer(isRightAnswer = false) {
       if (isRightAnswer) {
-        rightAnswersPct += 10;
+        rightAnswersCount += 1;
+        rightAnswersPct = (rightAnswersCount / currentLevel.totalAnswers) * 100;
 
         updateParticlesProgress(particlesBg, rightAnswersPct);
+        this.showCorrectAnswerFeedback();
       }
 
       this.createNewInterval();
     },
+    playCurrentInterval() {
+      clearTimeout(intervalAudioOn);
+      clearTimeout(intervalAudioOff);
+      clearInterval(intervalId);
+      const audioPosition = (root - audioLib.firstNote) * 8;
+      const lastAudioPosition = audioPosition + currentInterval.distance * 8;
+      audio.pause();
+      gsap.killTweensOf(audio);
+      audio.currentTime = audioPosition;
+      audio.volume = 0.7;
+      audio.play();
+      isAudioPlaying = true;
+
+      intervalAudioOn = setTimeout(() => {
+        intervalId = setInterval(() => {
+          const newVolume = audio.volume - 0.03;
+          if (newVolume <= 0) {
+            clearInterval(intervalId);
+            audio.currentTime = lastAudioPosition;
+            audio.volume = 0.7;
+          } else {
+            audio.volume = newVolume;
+          }
+        }, 50);
+      }, 900);
+
+      intervalAudioOff = setTimeout(() => {
+        intervalId = setInterval(() => {
+          const newVolume = audio.volume - 0.03;
+          if (newVolume <= 0) {
+            audio.pause();
+            isAudioPlaying = false;
+            clearInterval(intervalId);
+          } else {
+            audio.volume = newVolume;
+          }
+        }, 50);
+      }, 2900);
+    },
+    showCorrectAnswerFeedback() {
+      const feedback = renderFeedback(fonts);
+
+      gsap.to(feedback.scale, {
+        x: 5,
+        y: 5,
+        z: 5,
+        duration: 1,
+        ease: "elastic.inOut",
+        onComplete: () => {
+          feedback.geometry.dispose();
+          feedback.material.dispose();
+          scene.remove(feedback);
+        },
+      });
+      scene.add(feedback);
+    },
     chooseInterval() {
-      const randomIndex = Math.floor(Math.random() * 128383) % INTERVALS.length;
-      currentInterval = INTERVALS[randomIndex];
+      const randomIndex =
+        Math.floor(Math.random() * 128383) % levelIntervals.length;
+      currentInterval = levelIntervals[randomIndex];
     },
     chooseRootNoteToPlay() {
       const min = audioLib.firstNote;
@@ -344,8 +502,10 @@ const createIntervalsGame = async (
       root = randomNote;
     },
     chooseAnswers() {
-      let filtered = INTERVALS.filter(
-        (interval) => interval.id !== currentInterval.id
+      let filtered = levelIntervals.filter(
+        (interval) =>
+          interval.id !== currentInterval.id &&
+          interval.distance !== currentInterval.distance
       );
       let answers = [currentInterval];
       let randomIndex = Math.floor(Math.random() * 128383) % filtered.length;
@@ -355,7 +515,10 @@ const createIntervalsGame = async (
         const answer = filtered[randomIndex];
         answers.push(answer);
         filtered = filtered.filter(
-          (interval) => answer && interval.id !== answer.id
+          (interval) =>
+            answer &&
+            interval.id !== answer.id &&
+            interval.distance !== answer.distance
         );
       }
 

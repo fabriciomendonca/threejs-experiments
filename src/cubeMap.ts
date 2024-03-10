@@ -1,5 +1,3 @@
-import * as THREE from "three";
-
 const getCellMapPosition = (cell: string, direction = "vertical") => {
   if (direction === "vertical") {
     switch (cell) {

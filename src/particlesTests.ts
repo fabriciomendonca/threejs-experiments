@@ -142,7 +142,6 @@ export const particlesTests = () => {
 
       for (let i = 0; i < numParticles; i++) {
         const i3 = i * 3;
-        const rand = Math.pow(Math.random() - 0.5, 3);
         const x = Math.random() * 60 - 30;
         const y = Math.random() * 60 - 30;
         const z = Math.random() * 60 - 30;
@@ -165,7 +164,7 @@ export const particlesTests = () => {
 
       const internalTick = (time = 0) => {
         for (let i = 0; i < numParticles; i++) {
-          const i3 = i * 3;
+          // const i3 = i * 3;
           // const x = Math.random() * 60 - 30;
           // const y = Math.random() * 60 - 30;
           // const z = Math.random() * 60 - 30;

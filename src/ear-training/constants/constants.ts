@@ -31,12 +31,54 @@ export const INTERVALS: Interval[] = [
   { id: "13M", name: "Décima terceira Maior", distance: 21 },
 ];
 
+const easy = ["1J", "2m", "2M", "3m", "3M", "4J", "5J", "8J"];
+const normal = [...easy, "4aum", "5dim", "6m", "6M", "7", "7M"];
+const hard = [
+  ...normal,
+  "9m",
+  "9M",
+  "9aum",
+  "10m",
+  "10M",
+  "11J",
+  "11aum",
+  "13m",
+  "13M",
+];
+
+export type LevelName = "easy" | "normal" | "hard";
+export type Level = {
+  intervals: string[];
+  totalAnswers: number;
+};
+export const LEVELS: Record<LevelName, Level> = {
+  easy: {
+    intervals: easy,
+    totalAnswers: 100,
+  },
+  normal: {
+    intervals: normal,
+    totalAnswers: 150,
+  },
+  hard: {
+    intervals: hard,
+    totalAnswers: 200,
+  },
+};
+
 export type AudioLib = {
   id: number;
   instrument: string;
   firstNote: number;
   lastNote: number;
+  file: string;
 };
 export const AUDIO_LIBS: AudioLib[] = [
-  { id: 1, instrument: "bass", firstNote: 60, lastNote: 96 },
+  {
+    id: 1,
+    instrument: "bass",
+    firstNote: 35,
+    lastNote: 79,
+    file: "audio/bass-lib.mp3",
+  },
 ];
