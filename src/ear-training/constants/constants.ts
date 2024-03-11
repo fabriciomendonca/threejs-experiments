@@ -71,14 +71,15 @@ export type AudioLib = {
   instrument: string;
   firstNote: number;
   lastNote: number;
-  file: string;
+  folder: string;
 };
+
 export const AUDIO_LIBS: AudioLib[] = [
   {
     id: 1,
     instrument: "bass",
     firstNote: 35,
     lastNote: 79,
-    file: "audio/bass-lib.mp3",
+    folder: "audio/bass",
   },
 ];

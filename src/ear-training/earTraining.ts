@@ -11,20 +11,28 @@ import {
 import gsap from "gsap";
 
 const loadAudio = async () => {
-  const audio = new Audio();
+  const audios = new Map();
+  const lib = AUDIO_LIBS[0];
+  const promises = [];
+  for (let i = lib.firstNote; i <= lib.lastNote; i++) {
+    const audio = new Audio();
 
-  const promise = new Promise((resolve) => {
-    audio.addEventListener("canplay", () => {
-      resolve(true);
+    const promise = new Promise((resolve) => {
+      audio.addEventListener("canplay", () => {
+        resolve(true);
+      });
+
+      audio.src = `${AUDIO_LIBS[0].folder}/${i}.mp3`;
+      audio.load();
     });
 
-    audio.src = AUDIO_LIBS[0].file;
-    audio.load();
-  });
+    promises.push(promise);
+    audios.set(i, audio);
+  }
 
-  await Promise.all([promise]);
+  await Promise.all(promises);
 
-  return audio;
+  return audios;
 };
 
 const loadFonts = async () => {
@@ -309,7 +317,7 @@ const createIntervalsGame = async (
   let currentAnswers: Interval[] = [];
   let replayButton: THREE.Group;
   let audioLib: AudioLib = AUDIO_LIBS[0];
-  let audio: HTMLAudioElement;
+  let audios: Map<number, HTMLAudioElement>;
   let isAudioPlaying = false;
   let root = 0;
   let rightAnswersCount = 0;
@@ -363,7 +371,7 @@ const createIntervalsGame = async (
       scene.add(homeText);
     },
     async startGame(level: LevelName) {
-      audio = await loadAudio();
+      audios = await loadAudio();
       currentLevelName = level;
       currentLevel = LEVELS[currentLevelName];
 
@@ -434,40 +442,25 @@ const createIntervalsGame = async (
       clearTimeout(intervalAudioOn);
       clearTimeout(intervalAudioOff);
       clearInterval(intervalId);
-      const audioPosition = (root - audioLib.firstNote) * 8;
-      const lastAudioPosition = audioPosition + currentInterval.distance * 8;
-      audio.pause();
-      gsap.killTweensOf(audio);
-      audio.currentTime = audioPosition;
-      audio.volume = 0.7;
-      audio.play();
+
+      const rootAudio = audios.get(root);
+      const intervalAudio = audios.get(root + currentInterval.distance);
+      // The count avoids infinite loop when 1J
+      let count = 0;
+      intervalAudio?.addEventListener("ended", () => {
+        if (count === 1) {
+          isAudioPlaying = false;
+        }
+      });
+      rootAudio?.addEventListener("ended", () => {
+        if (count === 0) {
+          intervalAudio?.play();
+        }
+        count += 1;
+      });
+
       isAudioPlaying = true;
-
-      intervalAudioOn = setTimeout(() => {
-        intervalId = setInterval(() => {
-          const newVolume = audio.volume - 0.03;
-          if (newVolume <= 0) {
-            clearInterval(intervalId);
-            audio.currentTime = lastAudioPosition;
-            audio.volume = 0.7;
-          } else {
-            audio.volume = newVolume;
-          }
-        }, 50);
-      }, 900);
-
-      intervalAudioOff = setTimeout(() => {
-        intervalId = setInterval(() => {
-          const newVolume = audio.volume - 0.03;
-          if (newVolume <= 0) {
-            audio.pause();
-            isAudioPlaying = false;
-            clearInterval(intervalId);
-          } else {
-            audio.volume = newVolume;
-          }
-        }, 50);
-      }, 2900);
+      rootAudio?.play();
     },
     showCorrectAnswerFeedback() {
       const feedback = renderFeedback(fonts);
