@@ -203,7 +203,7 @@ const createParticles = () => {
   const geometry = new THREE.BufferGeometry();
 
   const material = new THREE.PointsMaterial({
-    size: 0.01,
+    size: 0.1,
     sizeAttenuation: true,
     depthWrite: false,
     vertexColors: true,
