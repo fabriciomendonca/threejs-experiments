@@ -203,7 +203,7 @@ const createParticles = () => {
   const geometry = new THREE.BufferGeometry();
 
   const material = new THREE.PointsMaterial({
-    size: 0.001,
+    size: 0.01,
     sizeAttenuation: true,
     depthWrite: false,
     vertexColors: true,
@@ -211,7 +211,7 @@ const createParticles = () => {
 
   const particles = new THREE.Points(geometry, material);
 
-  const size = 50000;
+  const size = 20000;
 
   const positions = new Float32Array(size * 3);
   const colors = new Float32Array(size * 3);
