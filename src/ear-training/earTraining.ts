@@ -1,5 +1,10 @@
 import * as THREE from "three";
-import { Font, FontLoader, TextGeometry } from "three/examples/jsm/Addons.js";
+import {
+  Font,
+  FontLoader,
+  OrbitControls,
+  TextGeometry,
+} from "three/examples/jsm/Addons.js";
 import {
   AUDIO_LIBS,
   AudioLib,
@@ -72,7 +77,7 @@ const renderLandingPage = (fonts: Map<string, Font>) => {
 
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.y = 2;
-  mesh.position.z = -15;
+  mesh.position.z = 0;
 
   const geometryEasy = new TextGeometry("Fácil", {
     font: fonts.get("roboto") as Font,
@@ -89,9 +94,25 @@ const renderLandingPage = (fonts: Map<string, Font>) => {
   geometryEasy.center();
 
   const meshEasy = new THREE.Mesh(geometryEasy, materialEasy);
-  meshEasy.name = "easy";
-  meshEasy.position.y = 0;
-  meshEasy.position.z = -15;
+  meshEasy.name = "easy-text";
+
+  const easyBox = new THREE.Box3().setFromObject(meshEasy);
+  const easyWidth = easyBox.max.x - easyBox.min.x;
+  const easyHeight = easyBox.max.y - easyBox.min.y;
+  const planeEasyGeometry = new THREE.PlaneGeometry(easyWidth, easyHeight);
+  const planeEasyMaterial = new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide,
+  });
+  const planeEasy = new THREE.Mesh(planeEasyGeometry, planeEasyMaterial);
+  planeEasy.name = "easy-plane";
+
+  const groupEasy = new THREE.Group();
+  groupEasy.add(meshEasy, planeEasy);
+  groupEasy.position.y = 0;
+  groupEasy.position.z = 0;
 
   const geometryNormal = new TextGeometry("Normal", {
     font: fonts.get("roboto") as Font,
@@ -108,9 +129,28 @@ const renderLandingPage = (fonts: Map<string, Font>) => {
   geometryNormal.center();
 
   const meshNormal = new THREE.Mesh(geometryNormal, materialNormal);
-  meshNormal.name = "normal";
-  meshNormal.position.y = -2;
-  meshNormal.position.z = -15;
+  meshNormal.name = "normal-text";
+
+  const normalBox = new THREE.Box3().setFromObject(meshNormal);
+  const normalWidth = normalBox.max.x - normalBox.min.x;
+  const normalHeight = normalBox.max.y - normalBox.min.y;
+  const planeNormalGeometry = new THREE.PlaneGeometry(
+    normalWidth,
+    normalHeight
+  );
+  const planeNormalMaterial = new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide,
+  });
+  const planeNormal = new THREE.Mesh(planeNormalGeometry, planeNormalMaterial);
+  planeNormal.name = "normal-plane";
+
+  const groupNormal = new THREE.Group();
+  groupNormal.add(meshNormal, planeNormal);
+  groupNormal.position.y = -2;
+  groupNormal.position.z = 0;
 
   const geometryHard = new TextGeometry("Difícil", {
     font: fonts.get("roboto") as Font,
@@ -127,19 +167,33 @@ const renderLandingPage = (fonts: Map<string, Font>) => {
   geometryHard.center();
 
   const meshHard = new THREE.Mesh(geometryHard, materialHard);
-  meshHard.name = "normal";
-  meshHard.position.y = -4;
-  meshHard.position.z = -15;
+  meshHard.name = "hard-text";
+
+  const hardBox = new THREE.Box3().setFromObject(meshHard);
+  const hardWidth = hardBox.max.x - hardBox.min.x;
+  const hardHeight = hardBox.max.y - hardBox.min.y;
+  const planeHardGeometry = new THREE.PlaneGeometry(hardWidth, hardHeight);
+  const planeHardMaterial = new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide,
+  });
+  const planeHard = new THREE.Mesh(planeHardGeometry, planeHardMaterial);
+  planeHard.name = "hard-plane";
+
+  const groupHard = new THREE.Group();
+  groupHard.add(meshHard, planeHard);
+  groupHard.position.y = -4;
+  groupHard.position.z = 0;
 
   const group = new THREE.Group();
 
-  group.add(mesh, meshEasy, meshNormal, meshHard);
+  group.add(mesh, groupEasy, groupNormal, groupHard);
   return group;
 };
 
 const renderReplayButton = (fonts: Map<string, Font>) => {
-  const group = new THREE.Group();
-
   const textGeometry = new TextGeometry("Replay", {
     font: fonts.get("roboto") as Font,
     size: 1,
@@ -154,8 +208,23 @@ const renderReplayButton = (fonts: Map<string, Font>) => {
   });
   const text = new THREE.Mesh(textGeometry, textMaterial);
 
-  group.add(text);
-  group.position.z = -15;
+  const box = new THREE.Box3().setFromObject(text);
+  const width = box.max.x - box.min.x;
+  const height = box.max.y - box.min.y;
+
+  const planeGeometry = new THREE.PlaneGeometry(width, height);
+  const planeMaterial = new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    opacity: 0,
+    transparent: true,
+    side: THREE.DoubleSide,
+  });
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+  const group = new THREE.Group();
+  group.add(text, plane);
+  group.position.z = 0;
+
   return group;
 };
 
@@ -174,7 +243,7 @@ const renderFeedback = (fonts: Map<string, Font>) => {
   });
 
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.z = -10;
+  mesh.position.z = 1;
   return mesh;
 };
 
@@ -200,8 +269,24 @@ const renderIntervals = (fonts: Map<string, Font>) => {
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.name = interval.id;
-    mesh.position.set(0, 0, -15);
-    intervalsMeshes.set(interval.id, mesh);
+
+    const box = new THREE.Box3().setFromObject(mesh);
+    const width = box.max.x - box.min.x;
+    const height = box.max.y - box.min.y;
+    const planeGeometry = new THREE.PlaneGeometry(width, height);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff0000,
+      opacity: 0,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+    const group = new THREE.Group();
+    group.position.set(0, 0, 0);
+    group.add(mesh, plane);
+
+    intervalsMeshes.set(interval.id, group);
   });
 
   return intervalsMeshes;
@@ -226,9 +311,9 @@ const createParticles = () => {
   for (let i = 0; i < size; i++) {
     const i3 = i * 3;
 
-    const x = (Math.random() - 0.5) * 45;
-    const y = (Math.random() - 0.5) * 45;
-    const z = (Math.random() - 0.5) * 45;
+    const x = (Math.random() - 0.5) * 50;
+    const y = (Math.random() - 0.5) * 50;
+    const z = (Math.random() - 0.5) * 80;
     positions[i3] = x;
     positions[i3 + 1] = y;
     positions[i3 + 2] = z;
@@ -273,7 +358,7 @@ const renderAnswers = (
 
   answersGroup.position.x = -stepX / 2;
   answersGroup.position.y = -stepY / 2;
-  answersGroup.position.z = -10;
+  answersGroup.position.z = 0;
 
   return answersGroup;
 };
@@ -309,7 +394,8 @@ const convertFromMouseCoordsToPointer = (position: {
 
 const createIntervalsGame = async (
   scene: THREE.Scene,
-  camera: THREE.PerspectiveCamera
+  camera: THREE.PerspectiveCamera,
+  orbitControls: OrbitControls
 ) => {
   let answersGroup: THREE.Group;
   let particlesBg: THREE.Points;
@@ -334,6 +420,10 @@ const createIntervalsGame = async (
 
   return {
     init() {
+      camera.position.z = window.innerWidth <= 600 ? 40 : 20;
+      camera.position.x = -5;
+      camera.position.y = 10;
+
       particlesBg = createParticles();
       scene.add(particlesBg);
 
@@ -355,15 +445,24 @@ const createIntervalsGame = async (
 
           if (selected.name) {
             homeText.children.forEach((child) => {
-              (child as THREE.Mesh).geometry.dispose();
-              ((child as THREE.Mesh).material as THREE.Material).dispose();
-
-              child.remove(child);
+              if (child.children) {
+                child.children.forEach((grandChild) => {
+                  (grandChild as THREE.Mesh).geometry.dispose();
+                  (
+                    (grandChild as THREE.Mesh).material as THREE.Material
+                  ).dispose();
+                });
+              } else {
+                (child as THREE.Mesh).geometry.dispose();
+                ((child as THREE.Mesh).material as THREE.Material).dispose();
+              }
             });
             scene.remove(homeText);
             window.removeEventListener("mouseup", onStart);
 
-            this.startGame(selected.name as LevelName);
+            this.startGame(
+              selected.name.replace(/-(text|plane)$/gi, "") as LevelName
+            );
           }
         }
       };
@@ -392,8 +491,10 @@ const createIntervalsGame = async (
       replayButton = renderReplayButton(fonts);
       if (answersGroup) {
         answersGroup.children.forEach((child) => {
-          (child as THREE.Mesh).geometry.dispose();
-          ((child as THREE.Mesh).material as THREE.Material).dispose();
+          child.children.forEach((grandChild) => {
+            (grandChild as THREE.Mesh).geometry.dispose();
+            ((grandChild as THREE.Mesh).material as THREE.Material).dispose();
+          });
 
           answersGroup.remove(child);
         });
@@ -415,7 +516,6 @@ const createIntervalsGame = async (
 
         if (hits.length > 0) {
           const selected = hits[0].object;
-
           const isRightAnswer = selected.name === currentInterval.id;
 
           this.onAnswer(isRightAnswer);
@@ -537,8 +637,16 @@ const createIntervalsGame = async (
 
 export const earTraining = () => {
   return {
-    async render(scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
-      const intervalsGame = await createIntervalsGame(scene, camera);
+    async render(
+      scene: THREE.Scene,
+      camera: THREE.PerspectiveCamera,
+      orbitControls: OrbitControls
+    ) {
+      const intervalsGame = await createIntervalsGame(
+        scene,
+        camera,
+        orbitControls
+      );
 
       intervalsGame.init();
     },

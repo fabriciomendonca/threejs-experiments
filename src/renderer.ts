@@ -471,11 +471,11 @@ export const createRenderer = (container: HTMLDivElement) => {
 
     renderEarTraining() {
       this.showBackground(0x000000);
+
       const module = earTraining();
 
-      mainCamera.position.z = 25;
-      mainCamera.position.y = 0;
-      module.render(scene, mainCamera);
+      // this.autoRotateOrbitControls();
+      module.render(scene, mainCamera, orbitControls);
     },
   };
 };
