@@ -475,7 +475,7 @@ export const createRenderer = (container: HTMLDivElement) => {
       const module = earTraining();
 
       // this.autoRotateOrbitControls();
-      module.render(scene, mainCamera, orbitControls);
+      module.render(scene, mainCamera);
     },
   };
 };

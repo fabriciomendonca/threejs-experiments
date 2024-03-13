@@ -1,10 +1,5 @@
 import * as THREE from "three";
-import {
-  Font,
-  FontLoader,
-  OrbitControls,
-  TextGeometry,
-} from "three/examples/jsm/Addons.js";
+import { Font, FontLoader, TextGeometry } from "three/examples/jsm/Addons.js";
 import {
   AUDIO_LIBS,
   AudioLib,
@@ -394,8 +389,7 @@ const convertFromMouseCoordsToPointer = (position: {
 
 const createIntervalsGame = async (
   scene: THREE.Scene,
-  camera: THREE.PerspectiveCamera,
-  orbitControls: OrbitControls
+  camera: THREE.PerspectiveCamera
 ) => {
   let answersGroup: THREE.Group;
   let particlesBg: THREE.Points;
@@ -637,16 +631,8 @@ const createIntervalsGame = async (
 
 export const earTraining = () => {
   return {
-    async render(
-      scene: THREE.Scene,
-      camera: THREE.PerspectiveCamera,
-      orbitControls: OrbitControls
-    ) {
-      const intervalsGame = await createIntervalsGame(
-        scene,
-        camera,
-        orbitControls
-      );
+    async render(scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
+      const intervalsGame = await createIntervalsGame(scene, camera);
 
       intervalsGame.init();
     },
