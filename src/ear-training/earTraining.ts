@@ -276,6 +276,7 @@ const renderIntervals = (fonts: Map<string, Font>) => {
       side: THREE.DoubleSide,
     });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.name = interval.id;
 
     const group = new THREE.Group();
     group.position.set(0, 0, 0);
