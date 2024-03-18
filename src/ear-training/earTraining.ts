@@ -461,10 +461,7 @@ const createIntervalsGame = async (
           }
         }
       };
-      const onTouchStart = (event: TouchEvent) => {
-        event.preventDefault();
-        onStart(event.touches[0]);
-      };
+
       window.addEventListener("click", onStart);
       scene.add(homeText);
     },
@@ -527,11 +524,6 @@ const createIntervalsGame = async (
         if (replayHits.length > 0 && !isAudioPlaying) {
           this.playCurrentInterval();
         }
-      };
-
-      const onTouchStart = (event: TouchEvent) => {
-        event.preventDefault();
-        onIntervalClick(event.touches[0]);
       };
 
       window.addEventListener("click", onIntervalClick, false);
