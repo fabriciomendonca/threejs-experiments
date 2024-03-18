@@ -453,7 +453,8 @@ const createIntervalsGame = async (
               }
             });
             scene.remove(homeText);
-            window.removeEventListener("click", onStart);
+            window.removeEventListener("mousedown", onStart);
+            window.removeEventListener("touchstart", onTouchStart);
 
             this.startGame(
               selected.name.replace(/-(text|plane)$/gi, "") as LevelName
@@ -461,8 +462,12 @@ const createIntervalsGame = async (
           }
         }
       };
-
-      window.addEventListener("click", onStart);
+      const onTouchStart = (event: TouchEvent) => {
+        event.preventDefault();
+        onStart(event.touches[0]);
+      };
+      window.addEventListener("touchstart", onTouchStart);
+      window.addEventListener("mousedown", onStart);
       scene.add(homeText);
     },
     async startGame(level: LevelName) {
@@ -526,7 +531,13 @@ const createIntervalsGame = async (
         }
       };
 
-      window.addEventListener("click", onIntervalClick, false);
+      const onTouchStart = (event: TouchEvent) => {
+        event.preventDefault();
+        onIntervalClick(event.touches[0]);
+      };
+
+      window.addEventListener("touchstart", onTouchStart, false);
+      window.addEventListener("mousedown", onIntervalClick, false);
     },
     onAnswer(isRightAnswer = false) {
       if (isRightAnswer) {
