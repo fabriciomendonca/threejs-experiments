@@ -453,8 +453,7 @@ const createIntervalsGame = async (
               }
             });
             scene.remove(homeText);
-            window.removeEventListener("mouseup", onStart);
-            window.removeEventListener("touchstart", onTouchStart);
+            window.removeEventListener("click", onStart);
 
             this.startGame(
               selected.name.replace(/-(text|plane)$/gi, "") as LevelName
