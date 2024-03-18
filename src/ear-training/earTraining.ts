@@ -466,8 +466,7 @@ const createIntervalsGame = async (
         event.preventDefault();
         onStart(event.touches[0]);
       };
-      window.addEventListener("touchstart", onTouchStart);
-      window.addEventListener("mouseup", onStart);
+      window.addEventListener("click", onStart);
       scene.add(homeText);
     },
     async startGame(level: LevelName) {
@@ -536,8 +535,7 @@ const createIntervalsGame = async (
         onIntervalClick(event.touches[0]);
       };
 
-      window.addEventListener("touchstart", onTouchStart);
-      window.addEventListener("mouseup", onIntervalClick);
+      window.addEventListener("click", onIntervalClick, false);
     },
     onAnswer(isRightAnswer = false) {
       if (isRightAnswer) {

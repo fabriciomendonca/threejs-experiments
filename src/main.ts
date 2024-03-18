@@ -13,6 +13,7 @@ const init = () => {
   );
 
   renderer.start();
+  // renderer.renderSynthesizerModel();
   // renderer.renderCapoeiraModel();
   // renderer.renderSphere();
   // renderer.renderTargetTexture();
