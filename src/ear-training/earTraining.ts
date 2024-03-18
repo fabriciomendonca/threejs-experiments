@@ -427,7 +427,7 @@ const createIntervalsGame = async (
     createLandingPage() {
       const homeText = renderLandingPage(fonts);
 
-      const onStart = (position: MouseEvent) => {
+      const onStart = (position: { clientX: number; clientY: number }) => {
         const raycaster = new THREE.Raycaster();
         const pointer = convertFromMouseCoordsToPointer(position);
 
@@ -454,6 +454,7 @@ const createIntervalsGame = async (
             });
             scene.remove(homeText);
             window.removeEventListener("mouseup", onStart);
+            window.removeEventListener("touchstart", onTouchStart);
 
             this.startGame(
               selected.name.replace(/-(text|plane)$/gi, "") as LevelName
@@ -461,6 +462,11 @@ const createIntervalsGame = async (
           }
         }
       };
+      const onTouchStart = (event: TouchEvent) => {
+        event.preventDefault();
+        onStart(event.touches[0]);
+      };
+      window.addEventListener("touchstart", onTouchStart);
       window.addEventListener("mouseup", onStart);
       scene.add(homeText);
     },
@@ -501,7 +507,10 @@ const createIntervalsGame = async (
       scene.add(replayButton);
     },
     createListeners() {
-      window.addEventListener("mouseup", (position) => {
+      const onIntervalClick = (position: {
+        clientX: number;
+        clientY: number;
+      }) => {
         const raycaster = new THREE.Raycaster();
         const pointer = convertFromMouseCoordsToPointer(position);
 
@@ -520,7 +529,15 @@ const createIntervalsGame = async (
         if (replayHits.length > 0 && !isAudioPlaying) {
           this.playCurrentInterval();
         }
-      });
+      };
+
+      const onTouchStart = (event: TouchEvent) => {
+        event.preventDefault();
+        onIntervalClick(event.touches[0]);
+      };
+
+      window.addEventListener("touchstart", onTouchStart);
+      window.addEventListener("mouseup", onIntervalClick);
     },
     onAnswer(isRightAnswer = false) {
       if (isRightAnswer) {
