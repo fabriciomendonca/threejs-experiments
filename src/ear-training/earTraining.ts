@@ -18,9 +18,19 @@ const loadAudio = async () => {
     const audio = new Audio();
 
     const promise = new Promise((resolve) => {
-      audio.addEventListener("canplay", () => {
+      audio.autoplay = false;
+
+      audio.addEventListener("canplaythrough", () => {
+        console.log("Loaded");
         resolve(true);
       });
+      audio.addEventListener("canplay", () => {
+        console.log("Canplay");
+        // audio.pause();
+      });
+      audio.addEventListener("error", (error) =>
+        console.log(error.target.error)
+      );
 
       audio.src = `${AUDIO_LIBS[0].folder}/${i}.mp3`;
       audio.load();
@@ -31,6 +41,8 @@ const loadAudio = async () => {
   }
 
   await Promise.all(promises);
+
+  console.log("Audio loaded");
 
   return audios;
 };
@@ -565,14 +577,21 @@ const createIntervalsGame = async (
         }
       });
       rootAudio?.addEventListener("ended", () => {
-        if (count === 0) {
-          intervalAudio?.play();
+        if (count === 0 && intervalAudio) {
+          // intervalAudio.currentTime = 0;
+          intervalAudio.volume = 1;
+          intervalAudio.play();
         }
         count += 1;
       });
+      if (!rootAudio) {
+        return;
+      }
 
       isAudioPlaying = true;
-      rootAudio?.play();
+      // rootAudio.currentTime = 0;
+      rootAudio.volume = 1;
+      rootAudio.play();
     },
     showCorrectAnswerFeedback() {
       const feedback = renderFeedback(fonts);

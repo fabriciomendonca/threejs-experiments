@@ -18,8 +18,43 @@ export const guitarHero = () => {
   const matcapNote = textureLoader.load("/material/matcaps/128/2.png");
 
   const lanesPositions = [-6, -2, 2, 6];
+  const guitarPosZ = 0;
+  const lanesPosZ = 0.5;
+  const markersPosZ = 1;
+  const notesPosZ = 1.5;
+  // Colors from https://coolors.co/ae38fb-00bfb2-ffcb77-363537-ef2d56
+  const markerColors = [0xae38fb, 0xff6666, 0x00bfb2, 0xffcb77];
+
+  const convertFromMouseCoordsToPointer = (position: {
+    clientX: number;
+    clientY: number;
+  }) => {
+    const pointer = new THREE.Vector2();
+
+    pointer.x = (position.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(position.clientY / window.innerHeight) * 2 + 1;
+
+    return pointer;
+  };
+
+  const renderGuitar = () => {
+    const geometry = new THREE.PlaneGeometry(12, 200);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xff48f7,
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+
+    const guitar = new THREE.Group();
+    guitar.add(mesh);
+    guitar.position.y = 100;
+    guitar.position.z = guitarPosZ;
+
+    return guitar;
+  };
+
   const renderLanes = () => {
-    const lineGeometry = new THREE.CylinderGeometry(0.1, 0.1, 500);
+    const lineGeometry = new THREE.CylinderGeometry(0.1, 0.1, 200);
 
     const lineMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
@@ -29,14 +64,6 @@ export const guitarHero = () => {
     const line2 = new THREE.Mesh(lineGeometry, lineMaterial);
     const line3 = new THREE.Mesh(lineGeometry, lineMaterial);
     const line4 = new THREE.Mesh(lineGeometry, lineMaterial);
-    line1.rotation.x = -Math.PI * 0.5;
-    line2.rotation.x = -Math.PI * 0.5;
-    line3.rotation.x = -Math.PI * 0.5;
-    line4.rotation.x = -Math.PI * 0.5;
-    line1.position.z = -200;
-    line2.position.z = -200;
-    line3.position.z = -200;
-    line4.position.z = -200;
     line1.position.x = lanesPositions[0];
     line2.position.x = lanesPositions[1];
     line3.position.x = lanesPositions[2];
@@ -44,12 +71,11 @@ export const guitarHero = () => {
 
     const lanes = new THREE.Group();
     lanes.add(line1, line2, line3, line4);
+    lanes.position.y = 100;
+    lanes.position.z = lanesPosZ;
 
     return lanes;
   };
-
-  // Colors from https://coolors.co/ae38fb-00bfb2-ffcb77-363537-ef2d56
-  const markerColors = [0xae38fb, 0xff6666, 0x00bfb2, 0xffcb77];
 
   const renderMarkers = () => {
     const markerGeometry = new THREE.CylinderGeometry(0.75, 0.75, 0.25, 64, 64);
@@ -77,7 +103,7 @@ export const guitarHero = () => {
     const planeMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0,
+      opacity: 1,
     });
 
     const planeMarker1 = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -102,22 +128,14 @@ export const guitarHero = () => {
     marker2.position.x = lanesPositions[1];
     marker3.position.x = lanesPositions[2];
     marker4.position.x = lanesPositions[3];
-    marker1.position.z = 40;
-    marker2.position.z = 40;
-    marker3.position.z = 40;
-    marker4.position.z = 40;
 
-    planeMarker1.position.x = lanesPositions[0];
-    planeMarker1.position.z = marker1.position.z - 0.75;
+    planeMarker1.position.x = marker1.position.x;
+    planeMarker2.position.x = marker2.position.x;
+    planeMarker3.position.x = marker3.position.x;
+    planeMarker4.position.x = marker4.position.x;
     planeMarker1.position.y = 0.75;
-    planeMarker2.position.x = lanesPositions[1];
-    planeMarker2.position.z = marker1.position.z - 0.75;
     planeMarker2.position.y = 0.75;
-    planeMarker3.position.x = lanesPositions[2];
-    planeMarker3.position.z = marker1.position.z - 0.75;
     planeMarker3.position.y = 0.75;
-    planeMarker4.position.x = lanesPositions[3];
-    planeMarker4.position.z = marker1.position.z - 0.75;
     planeMarker4.position.y = 0.75;
 
     const markers = new THREE.Group();
@@ -132,7 +150,8 @@ export const guitarHero = () => {
     marker4Group.add(marker4, planeMarker4);
 
     markers.add(marker1Group, marker2Group, marker3Group, marker4Group);
-    markers.position.y = 0.225;
+    markers.position.z = markersPosZ;
+    markers.rotation.x = Math.PI * 0.5;
 
     return markers;
   };
@@ -153,7 +172,6 @@ export const guitarHero = () => {
         duration: 0.2,
         delay: line.time,
       });
-      console.log("Animate to", 50 - index * 16);
       gsap.to(linesContainer, {
         y: 34 - index * 32,
         duration: 0.2,
@@ -174,11 +192,7 @@ export const guitarHero = () => {
     document.body.appendChild(lyricsContainer);
   };
 
-  const renderCurrentSong = () => {
-    const lanes = renderLanes();
-    const markers = renderMarkers();
-    renderLyrics();
-
+  const renderNotes = (lanes: THREE.Group) => {
     const noteGeometry = new THREE.SphereGeometry(0.75, 64, 64);
     const noteMaterials = [
       new THREE.MeshMatcapMaterial({
@@ -200,16 +214,15 @@ export const guitarHero = () => {
     ];
 
     const notes = new THREE.Group();
-    notes.position.z = 40;
+    notes.position.z = notesPosZ;
 
     const notesData = currentSong.notes;
 
+    const animationTime = currentSong.duration;
     const bpm = currentSong.bpm;
     const bps = bpm / 60;
     const noteSpacing = 5;
-
-    let distance = currentSong.duration * noteSpacing * bps;
-    let animationTime = currentSong.duration;
+    const totalDistance = currentSong.duration * noteSpacing * bps;
 
     for (let noteData of notesData) {
       const note = new THREE.Mesh(
@@ -218,16 +231,103 @@ export const guitarHero = () => {
       );
       note.position.x = lanes.children[noteData.lane - 1].position.x;
       const noteDistance = noteData.time * noteSpacing * bps;
-      note.position.z -= noteDistance;
+      note.position.y += noteDistance;
 
       notes.add(note);
     }
-    notes.position.y = 0.75 + 0.1 + 0.225;
+
+    return {
+      notes,
+      animationTime,
+      totalDistance,
+    };
+  };
+
+  const computeNoteHit = (
+    notes: THREE.Group,
+    note: THREE.Mesh,
+    marker: THREE.Mesh
+  ) => {
+    hits += 1;
+    // const note: any = notesHit[0].object;
+
+    notes.remove(note);
+
+    note.position.x = marker.position.x;
+    note.position.y = marker.position.y;
+    note.position.z = 40;
+    scene.add(note);
+    gsap.to(note.position, {
+      y: note.position.y + 5,
+      duration: 0.3,
+      ease: "bounce.in",
+    });
+    gsap.to(note.scale, {
+      x: 0,
+      y: 0,
+      z: 0,
+      duration: 0.3,
+      ease: "bounce.in",
+      onComplete() {
+        note.geometry.dispose();
+        (note.material as THREE.MeshStandardMaterial).dispose();
+        scene.remove(note);
+      },
+    });
+  };
+
+  const checkIsNoteOverMarker = (notes: THREE.Group, marker: THREE.Mesh) => {
+    const markerX = marker.position.x;
+
+    const notesY = notes.position.y;
+
+    notes.children
+      .filter((note) => note.position.x === markerX)
+      .forEach((note) => {
+        const noteYPosition = note.position.y - Math.abs(notesY);
+        if (noteYPosition >= -2 && noteYPosition <= 2) {
+          computeNoteHit(notes, note as THREE.Mesh, marker);
+        }
+      });
+  };
+
+  const checkClick = (
+    position: { clientX: number; clientY: number },
+    markers: THREE.Group,
+    notes: THREE.Group
+  ) => {
+    const raycaster = new THREE.Raycaster();
+    const pointer = convertFromMouseCoordsToPointer(position);
+
+    raycaster.setFromCamera(pointer, camera);
+
+    const markersHit = raycaster.intersectObjects(markers.children);
+
+    if (markersHit.length > 0) {
+      const hitObject = markersHit[0].object;
+      const index = parseInt(
+        hitObject.name.replace(/(marker|planeMarker)/, "")
+      );
+
+      const markerGroup = markers.children[index - 1];
+
+      const marker = markerGroup.children[0] as THREE.Mesh;
+
+      checkIsNoteOverMarker(notes, marker);
+    }
+  };
+
+  const renderCurrentSong = () => {
+    const guitar = renderGuitar();
+    const lanes = renderLanes();
+    const markers = renderMarkers();
+    renderLyrics();
+    const { notes, animationTime, totalDistance } = renderNotes(lanes);
 
     const animate = () => {
       const timeline = gsap.timeline();
       timeline.to(notes.position, {
-        z: notes.position.z + distance,
+        y: notes.position.y - totalDistance,
         ease: "none",
         duration: animationTime,
       });
@@ -237,131 +337,40 @@ export const guitarHero = () => {
     audioSource.start();
     animate();
 
-    const convertFromMouseCoordsToPointer = (position: {
-      clientX: number;
-      clientY: number;
-    }) => {
-      const pointer = new THREE.Vector2();
-
-      pointer.x = (position.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = -(position.clientY / window.innerHeight) * 2 + 1;
-
-      return pointer;
-    };
-
-    let marker: any;
-    const computeNoteHit = (notesHit: any) => {
-      hits += 1;
-      const note: any = notesHit[0].object;
-
-      notes.remove(note);
-
-      note.position.x = marker.position.x;
-      note.position.y = marker.position.y;
-      note.position.z = marker.position.z;
-      scene.add(note);
-      gsap.to(note.position, {
-        y: note.position.y + 5,
-        duration: 0.3,
-        ease: "bounce.in",
-      });
-      gsap.to(note.scale, {
-        x: 0,
-        y: 0,
-        z: 0,
-        duration: 0.3,
-        ease: "bounce.in",
-        onComplete() {
-          note.geometry.dispose();
-          note.material.dispose();
-          scene.remove(note);
-        },
-      });
-    };
-    const checkPlaneMarkerHit = (marker: any) => {
-      let vector = new THREE.Vector3(
-        marker.position.x,
-        marker.position.y,
-        marker.position.z
-      );
-      vector.project(camera);
-
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(new THREE.Vector2(vector.x, vector.y), camera);
-      const notesHit = raycaster.intersectObjects(notes.children);
-      if (notesHit.length > 0) {
-        const note = notesHit[0].object;
-        const distanceToMark = notes.position.z - Math.abs(note.position.z);
-        if (
-          distanceToMark >= marker.position.z - 4 &&
-          distanceToMark <= marker.position.z + 4
-        ) {
-          computeNoteHit(notesHit);
-        }
-      }
-    };
-    const checkClick = (position: { clientX: number; clientY: number }) => {
-      const raycaster = new THREE.Raycaster();
-      const pointer = convertFromMouseCoordsToPointer(position);
-
-      raycaster.setFromCamera(pointer, camera);
-
-      const markersHit = raycaster.intersectObjects(markers.children);
-
-      if (markersHit.length > 0) {
-        const hitObject = markersHit[0].object;
-        const index = parseInt(
-          hitObject.name.replace(/(marker|planeMarker)/, "")
-        );
-
-        const markerGroup = markers.children[index - 1];
-
-        marker = markerGroup.children[1];
-
-        checkPlaneMarkerHit(marker);
-      }
-    };
-
     window.addEventListener("touchstart", (evt) => {
       evt.preventDefault();
       const touch = evt.touches[0];
-      checkClick(touch);
+      checkClick(touch, markers, notes);
     });
     window.addEventListener("mousedown", (evt) => {
       evt.preventDefault();
-      checkClick(evt);
+      checkClick(evt, markers, notes);
     });
     window.addEventListener("touchend", (evt) => {
       evt.preventDefault();
-      marker.material.color = new THREE.Color(0xae38fb);
     });
     window.addEventListener("mouseup", (evt) => {
       evt.preventDefault();
-      marker.material.color = new THREE.Color(0xae38fb);
     });
 
     const allowedKeys = ["a", "s", "d", "f"];
-    let isPressed = false;
-    window.addEventListener("keypress", (evt): void => {
-      if (isPressed || !allowedKeys.includes(evt.key)) {
-        return;
-      }
-
-      isPressed = true;
-      const index = allowedKeys.indexOf(evt.key);
-      marker = markers.children[index].children[1];
-
-      checkPlaneMarkerHit(marker);
-    });
-    window.addEventListener("keyup", (evt) => {
+    window.addEventListener("keydown", (evt): void => {
       if (!allowedKeys.includes(evt.key)) {
         return;
       }
 
-      isPressed = false;
+      const index = allowedKeys.indexOf(evt.key);
+      const marker = markers.children[index].children[1] as THREE.Mesh;
+
+      checkIsNoteOverMarker(notes, marker);
     });
 
-    return [lanes, markers, notes];
+    const game = new THREE.Group();
+    game.add(guitar, lanes, markers, notes);
+    game.position.z = 40;
+    game.rotation.x = -Math.PI * 0.5;
+
+    return [game];
   };
 
   const loadSong = async (song: Song) => {

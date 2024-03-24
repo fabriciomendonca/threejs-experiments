@@ -21,8 +21,8 @@ const init = () => {
   // renderer.renderCubeMap();
   // renderer.renderDisplacementTest();
   // renderer.renderParticleTests();
-  // renderer.renderGuitarHero();
-  renderer.renderEarTraining();
+  renderer.renderGuitarHero();
+  // renderer.renderEarTraining();
 };
 
 init();
