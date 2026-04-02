@@ -17,20 +17,35 @@ import { particlesTests } from "./particlesTests";
 // import modelParticlesFragment from "./shaders/modelParticles.frag.glsl";
 import { guitarHero } from "./guitar-hero/guitarHero";
 import { earTraining } from "./ear-training/earTraining";
+import { guitarHero2 } from "./guitar-hero/guitarHero2";
+import { fireworks } from "./fireworks/fireworks";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { fireworks2 } from "./fireworks/fireworks2";
+import { fireworks3 } from "./fireworks/fireworks3";
+import { fireworks4 } from "./fireworks/fireworks4";
+import { fireworks5 } from "./fireworks/fireworks5";
+import { fireworks6 } from "./fireworks/fireworks6";
 
 export const createRenderer = (container: HTMLDivElement) => {
   const width = container.clientWidth;
   const height = container.clientHeight;
 
+  const sizes = {
+    width,
+    height,
+    pixelRatio: Math.min(window.devicePixelRatio, 2),
+    resolution: new THREE.Vector2(width, height),
+  };
+
   // SCENE
   const scene = new THREE.Scene();
 
   // LIGHTS
-  const frontLight = new THREE.PointLight(0xffffff);
-  frontLight.intensity = 100;
-  frontLight.castShadow = true;
-  frontLight.position.set(0, 10, 0);
-  const ambientLight = new THREE.AmbientLight(0xffffff);
+  const frontLight = new THREE.DirectionalLight(0xffffff);
+  frontLight.intensity = 2;
+  // frontLight.castShadow = true;
+  frontLight.position.set(0, 20, 20);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 
   // CAMERAS
   const mainCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
@@ -41,8 +56,8 @@ export const createRenderer = (container: HTMLDivElement) => {
   mainRenderer.shadowMap.enabled = true;
   mainRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
   mainRenderer.setSize(width, height);
-  mainRenderer.setPixelRatio(window.devicePixelRatio);
   mainRenderer.setClearColor(0x000000, 0);
+  mainRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   const mainRendererCanvas = mainRenderer.domElement;
 
   // ORBIT CONTROLS
@@ -80,6 +95,19 @@ export const createRenderer = (container: HTMLDivElement) => {
       render,
     };
   };
+
+  // RESIZE HANDLER
+  const onResize = () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    mainCamera.aspect = width / height;
+    mainCamera.updateProjectionMatrix();
+
+    mainRenderer.setSize(width, height);
+    mainRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  };
+  window.addEventListener("resize", onResize);
 
   return {
     start() {
@@ -120,11 +148,16 @@ export const createRenderer = (container: HTMLDivElement) => {
     },
     renderSynthesizerModel() {
       const loader = new GLTFLoader();
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath("/draco/gltf/");
 
-      loader.load("synthesizer.glb", function (model) {
+      loader.setDRACOLoader(dracoLoader);
+
+      loader.load("models/tenis.glb", function (model) {
         const { scene: modelScene } = model;
         modelScene.scale.set(3, 3, 3);
         scene.add(modelScene);
+        console.log(model.scene);
       });
     },
     renderCapoeiraModel() {
@@ -458,14 +491,25 @@ export const createRenderer = (container: HTMLDivElement) => {
       scene.add(particles);
     },
 
-    async renderGuitarHero() {
+    renderGuitarHero() {
       this.showBackground(0x000000);
       const game = guitarHero();
 
       game.render(scene, mainCamera);
 
       mainCamera.position.z = 60;
-      mainCamera.position.y = 10;
+      mainCamera.position.y = 15;
+      mainCamera.lookAt(new THREE.Vector3(0, 0, 0));
+    },
+
+    renderGuitarHero2() {
+      this.showBackground(0x000000);
+      const game = guitarHero2();
+
+      game.render(scene, mainCamera);
+
+      mainCamera.position.z = 60;
+      mainCamera.position.y = 15;
       mainCamera.lookAt(new THREE.Vector3(0, 0, 0));
     },
 
@@ -476,6 +520,52 @@ export const createRenderer = (container: HTMLDivElement) => {
 
       // this.autoRotateOrbitControls();
       module.render(scene, mainCamera);
+    },
+
+    renderFireworks() {
+      this.showBackground(0x000000);
+
+      const module = fireworks();
+
+      module.render(scene);
+    },
+
+    renderFireworks2() {
+      this.showBackground(0x000000);
+
+      const module = fireworks2();
+
+      module.render(scene, sizes);
+    },
+
+    renderFireworks3() {
+      this.showBackground(0x000000);
+
+      const module = fireworks3();
+
+      module.render(scene, sizes);
+    },
+
+    renderFireworks4() {
+      this.showBackground(0x000000);
+
+      const module = fireworks4();
+
+      module.render(scene, sizes);
+    },
+    renderFireworks5() {
+      this.showBackground(0x000000);
+
+      const module = fireworks5();
+
+      module.render(scene, sizes);
+    },
+    renderFireworks6() {
+      this.showBackground(0x000000);
+
+      const module = fireworks6();
+
+      module.render(scene);
     },
   };
 };

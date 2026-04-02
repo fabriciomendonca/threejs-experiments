@@ -16,6 +16,12 @@ export const guitarHero = () => {
   const textureLoader = new THREE.TextureLoader();
   const matcapMarker = textureLoader.load("/material/matcaps/128/3.png");
   const matcapNote = textureLoader.load("/material/matcaps/128/2.png");
+  const guitarTexture = textureLoader.load("/textures/guitar_base.png");
+  const guitarTextureAlpha = textureLoader.load(
+    "/textures/guitar_base_alpha1.png"
+  );
+  guitarTexture.colorSpace = THREE.SRGBColorSpace;
+  guitarTextureAlpha.colorSpace = THREE.SRGBColorSpace;
 
   const lanesPositions = [-6, -2, 2, 6];
   const guitarPosZ = 0;
@@ -38,23 +44,26 @@ export const guitarHero = () => {
   };
 
   const renderGuitar = () => {
-    const geometry = new THREE.PlaneGeometry(12, 200);
+    const geometry = new THREE.PlaneGeometry(12, 2.32 * 12);
     const material = new THREE.MeshBasicMaterial({
-      color: 0xff48f7,
+      // color: 0xff48f7,
+      map: guitarTexture,
+      alphaMap: guitarTextureAlpha,
+      transparent: true,
     });
 
     const mesh = new THREE.Mesh(geometry, material);
 
     const guitar = new THREE.Group();
     guitar.add(mesh);
-    guitar.position.y = 100;
+    guitar.position.y = 2.32 * 6;
     guitar.position.z = guitarPosZ;
 
     return guitar;
   };
 
   const renderLanes = () => {
-    const lineGeometry = new THREE.CylinderGeometry(0.1, 0.1, 200);
+    const lineGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2.32 * 12);
 
     const lineMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
@@ -71,7 +80,7 @@ export const guitarHero = () => {
 
     const lanes = new THREE.Group();
     lanes.add(line1, line2, line3, line4);
-    lanes.position.y = 100;
+    lanes.position.y = 2.32 * 6;
     lanes.position.z = lanesPosZ;
 
     return lanes;
@@ -368,7 +377,7 @@ export const guitarHero = () => {
     const game = new THREE.Group();
     game.add(guitar, lanes, markers, notes);
     game.position.z = 40;
-    game.rotation.x = -Math.PI * 0.5;
+    game.rotation.x = -Math.PI * 0.4;
 
     return [game];
   };

@@ -21,8 +21,14 @@ const init = () => {
   // renderer.renderCubeMap();
   // renderer.renderDisplacementTest();
   // renderer.renderParticleTests();
-  // renderer.renderGuitarHero();
-  renderer.renderEarTraining();
+  renderer.renderGuitarHero();
+  // renderer.renderGuitarHero2();
+  // renderer.renderEarTraining();
+  // renderer.renderFireworks2();
+  // renderer.renderFireworks3();
+  // renderer.renderFireworks4();
+  // renderer.renderFireworks5();
+  // renderer.renderFireworks6();
 };
 
 init();
